@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bilginapplabs.github.io/zinciri-kirma.github.io/sitemap.xml
