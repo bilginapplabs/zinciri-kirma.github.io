@@ -212,6 +212,19 @@ h3 {
   width: 22px;
   height: 22px;
 }
+/* The App Store's place until the iOS app is published: not a link. */
+.btn-soon {
+  color: #ffffff;
+  border: 1.5px dashed rgba(255, 255, 255, 0.6);
+  cursor: default;
+}
+.btn-soon:active {
+  transform: none;
+}
+.btn-soon svg {
+  width: 20px;
+  height: 20px;
+}
 .btn-ghost {
   color: #ffffff;
   border: 1.5px solid rgba(255, 255, 255, 0.5);

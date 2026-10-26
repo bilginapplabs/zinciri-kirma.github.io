@@ -1,8 +1,8 @@
 """Builds the Zinciri Kırma website into this repository's root, which GitHub Pages serves.
 
 The legal pages are rendered from the Android app's assets/legal/*.md (../android next to this
-repository), the same files the app shows, so the site and the app never disagree. Store images,
-fonts and their licences are copied from there too.
+repository) and the iOS app's legal/*.md (../ios), the same files the apps show, so the site and
+the apps never disagree. Store images, fonts and their licences are copied from the Android one.
 
     python kaynak/build.py
 """
@@ -16,6 +16,7 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE.parent
 ANDROID = OUT.parent / "android"
 LEGAL = ANDROID / "app/src/main/assets/legal"
+IOS_LEGAL = OUT.parent / "ios" / "legal"
 LICENSES = ANDROID / "app/src/main/assets/licenses"
 SHOTS = ANDROID / "docs/play/gorseller"
 FONTS = ANDROID / "app/src/main/res/font"
@@ -26,6 +27,8 @@ KEEP = {".git", "kaynak", "README.md", ".gitignore"}
 # Where the site is served; used only for canonical, hreflang and social preview links.
 BASE_URL = "https://bilginapplabs.github.io/zinciri-kirma.github.io/"
 PLAY_URL = "https://play.google.com/store/apps/details?id=com.bilginapps.habitchain"
+# The iOS app's App Store page; empty until it is published, so the site says "coming soon".
+APP_STORE_URL = ""
 EMAIL = "bilginapplabs@gmail.com"
 
 # Page key -> path per language. Each page links to its counterpart in the other language.
@@ -34,6 +37,9 @@ PATHS = {
     "privacy": {"tr": "gizlilik/", "en": "en/privacy/"},
     "terms": {"tr": "kosullar/", "en": "en/terms/"},
     "delete": {"tr": "veri-silme/", "en": "en/delete-data/"},
+    # The iPhone and iPad app's own texts (App Store Connect links to these).
+    "ios_privacy": {"tr": "ios/gizlilik/", "en": "en/ios/privacy/"},
+    "ios_terms": {"tr": "ios/kosullar/", "en": "en/ios/terms/"},
 }
 
 T = {
@@ -44,6 +50,9 @@ T = {
         "skip": "İçeriğe geç",
         "nav": [("#features", "Özellikler"), ("#screens", "Ekranlar"), ("#plus", "Zincir+"), ("#faq", "SSS")],
         "play": "Google Play'den indir",
+        "app_store": "App Store'dan indir",
+        "app_store_soon": "Yakında App Store'da",
+        "app_store_soon_short": "App Store (yakında)",
         "site_desc": "Her gün bir halka ekle, zincirini kırma. Hatırlatmalı, reklamsız ve verin yalnızca telefonunda kalan bir alışkanlık takip uygulaması.",
         "home_title": "Zinciri Kırma · Alışkanlık takibi",
         "footer_about": "Her gün bir halka ekle, zincirini kırma. Hatırlatmalı, reklamsız, gizli bir alışkanlık takip uygulaması.",
@@ -54,6 +63,8 @@ T = {
         "privacy": "Gizlilik Politikası",
         "terms": "Kullanım Koşulları",
         "delete": "Verilerini silme",
+        "ios_privacy": "Gizlilik Politikası (iOS)",
+        "ios_terms": "Kullanım Koşulları (iOS)",
         "home": "Ana sayfa",
         "contents": "İçindekiler",
         "binding_note": 'Bu metnin İngilizce çevirisi: <a href="{other}">{label}</a>.',
@@ -153,7 +164,7 @@ T = {
             ("Verilerimi nasıl silerim?",
              "Profil › Ayarlar › \"Tüm verilerimi sil\" ile her şeyi bu telefondan kalıcı olarak silersin. Ayrıntılar <a href=\"{root}veri-silme/\">Verilerini silme</a> sayfasında."),
             ("Hangi telefonlarda çalışır?",
-             "Android 8.0 ve üzeri sürümlerde çalışır."),
+             "Android 8.0 ve üzeri sürümlerde çalışır. iPhone ve iPad sürümü (iOS 17 ve üzeri) yakında App Store'da; onun <a href=\"{root}ios/gizlilik/\">gizlilik politikası</a> ayrıdır."),
             ("Bir sorun buldum ya da önerim var.",
              "Bize <a href=\"mailto:{email}\">{email}</a> adresinden yaz; her e-postayı okuyoruz."),
         ],
@@ -167,6 +178,9 @@ T = {
         "skip": "Skip to content",
         "nav": [("#features", "Features"), ("#screens", "Screens"), ("#plus", "Zincir+"), ("#faq", "FAQ")],
         "play": "Get it on Google Play",
+        "app_store": "Download on the App Store",
+        "app_store_soon": "Coming soon to the App Store",
+        "app_store_soon_short": "App Store (coming soon)",
         "site_desc": "Add one link a day and don't break the chain. A habit tracker with reminders, no ads, and your data kept only on your phone.",
         "home_title": "Zinciri Kırma · Habit tracker",
         "footer_about": "Add one link a day and don't break the chain. A private habit tracker with reminders and no ads.",
@@ -177,6 +191,8 @@ T = {
         "privacy": "Privacy Policy",
         "terms": "Terms of Use",
         "delete": "Deleting your data",
+        "ios_privacy": "Privacy Policy (iOS)",
+        "ios_terms": "Terms of Use (iOS)",
         "home": "Home",
         "contents": "Contents",
         "binding_note": 'The binding text is the Turkish original: <a href="{other}">{label}</a>.',
@@ -276,7 +292,7 @@ T = {
             ("How do I delete my data?",
              "Profile › Settings › \"Delete all my data\" permanently deletes everything from this phone. See <a href=\"{root}en/delete-data/\">Deleting your data</a> for details."),
             ("Which phones does it run on?",
-             "Android 8.0 and later."),
+             "Android 8.0 and later. The iPhone and iPad app (iOS 17 and later) is coming soon to the App Store; it has its own <a href=\"{root}en/ios/privacy/\">privacy policy</a>."),
             ("I found a problem or have an idea.",
              "Write to us at <a href=\"mailto:{email}\">{email}</a>; we read every email."),
         ],
@@ -294,6 +310,7 @@ ICONS = {
     "left": '<path d="M15 5l-7 7 7 7"/>',
     "right": '<path d="M9 5l7 7-7 7"/>',
     "arrow": '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+    "phone": '<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
 }
 
 
@@ -308,6 +325,22 @@ def root_of(path):
 
 def play_url(lang):
     return PLAY_URL if lang == "tr" else PLAY_URL + "&hl=en"
+
+
+def app_store_button(lang):
+    """The App Store's place next to Google Play: a link once the app is out, "coming soon" until then.
+    A plain phone sign, not Apple's logo, which only Apple's own badge may carry."""
+    t = T[lang]
+    if APP_STORE_URL:
+        return f'<a class="btn btn-play" href="{APP_STORE_URL}" rel="noopener">{icon("phone")}{t["app_store"]}</a>'
+    return f'<span class="btn btn-soon" role="note">{icon("phone")}{t["app_store_soon"]}</span>'
+
+
+def app_store_item(lang):
+    t = T[lang]
+    if APP_STORE_URL:
+        return f'<li><a href="{APP_STORE_URL}" rel="noopener">App Store</a></li>'
+    return f"<li>{t['app_store_soon_short']}</li>"
 
 
 # ---------- Shared frame ----------
@@ -382,7 +415,7 @@ def footer(lang, root):
     </div>
     <div>
       <h4>{t['footer_app']}</h4>
-      <ul>{links_app}<li><a href="{play_url(lang)}" rel="noopener">Google Play</a></li></ul>
+      <ul>{links_app}<li><a href="{play_url(lang)}" rel="noopener">Google Play</a></li>{app_store_item(lang)}</ul>
     </div>
     <div>
       <h4>{t['footer_legal']}</h4>
@@ -390,6 +423,8 @@ def footer(lang, root):
         <li><a href="{root}{PATHS['privacy'][lang]}">{t['privacy']}</a></li>
         <li><a href="{root}{PATHS['terms'][lang]}">{t['terms']}</a></li>
         <li><a href="{root}{PATHS['delete'][lang]}">{t['delete']}</a></li>
+        <li><a href="{root}{PATHS['ios_privacy'][lang]}">{t['ios_privacy']}</a></li>
+        <li><a href="{root}{PATHS['ios_terms'][lang]}">{t['ios_terms']}</a></li>
         <li><a href="mailto:{EMAIL}">{EMAIL}</a></li>
       </ul>
     </div>
@@ -458,7 +493,7 @@ def home(lang):
       <span class="eyebrow">{t['eyebrow']}</span>
       <h1>{t['h1']}</h1>
       <p class="lead">{t['lead']}</p>
-      <div class="cta">{play_btn}<a class="btn btn-ghost" href="#how">{t['how_btn']}</a></div>
+      <div class="cta">{play_btn}{app_store_button(lang)}<a class="btn btn-ghost" href="#how">{t['how_btn']}</a></div>
       <ul class="perks">{perks}</ul>
     </div>
     <div class="hero-phone"><img src="{root}assets/shots/{folder}/{hero_shot}" alt="{html.escape(t['hero_alt'])}" width="1080" height="1920" fetchpriority="high"></div>
@@ -511,6 +546,7 @@ def home(lang):
       <div class="links-row">
         <a class="chip-link" href="{root}{PATHS['privacy'][lang]}">{t['privacy']} ›</a>
         <a class="chip-link" href="{root}{PATHS['delete'][lang]}">{t['delete']} ›</a>
+        <a class="chip-link" href="{root}{PATHS['ios_privacy'][lang]}">{t['ios_privacy']} ›</a>
       </div>
     </div>
     <div class="vault">
@@ -634,16 +670,20 @@ def doc_page(key, lang, title, meta_pills, note, blocks, toc, desc):
 
 
 LEGAL_FILES = {
-    ("privacy", "tr"): "gizlilik-politikasi.md",
-    ("privacy", "en"): "privacy-policy.md",
-    ("terms", "tr"): "kullanim-kosullari.md",
-    ("terms", "en"): "terms-of-use.md",
+    ("privacy", "tr"): LEGAL / "gizlilik-politikasi.md",
+    ("privacy", "en"): LEGAL / "privacy-policy.md",
+    ("terms", "tr"): LEGAL / "kullanim-kosullari.md",
+    ("terms", "en"): LEGAL / "terms-of-use.md",
+    ("ios_privacy", "tr"): IOS_LEGAL / "gizlilik-politikasi.md",
+    ("ios_privacy", "en"): IOS_LEGAL / "privacy-policy.md",
+    ("ios_terms", "tr"): IOS_LEGAL / "kullanim-kosullari.md",
+    ("ios_terms", "en"): IOS_LEGAL / "terms-of-use.md",
 }
 
 
 def legal(key, lang):
     t = T[lang]
-    md = (LEGAL / LEGAL_FILES[(key, lang)]).read_text(encoding="utf-8")
+    md = LEGAL_FILES[(key, lang)].read_text(encoding="utf-8")
     title, meta, blocks, toc = markdown(md)
     root = root_of(PATHS[key][lang])
     other = t["other"]
@@ -651,7 +691,7 @@ def legal(key, lang):
     pills.append(f'<a class="pill" href="{root}{PATHS[key][other]}" hreflang="{other}">{t["other_label"]}</a>')
     if lang == "en":
         # The English file opens with its own translation notice; drop it for the linked note below.
-        if blocks and blocks[0].startswith("<p>") and "translation" in blocks[0]:
+        if blocks and blocks[0].startswith("<p>") and "translation" in blocks[0].lower():
             blocks = blocks[1:]
         note = t["binding_note"].format(other=f"{root}{PATHS[key]['tr']}", label=html.escape(T["tr"][key]))
     else:
@@ -830,12 +870,16 @@ def clean():
 def main():
     if not LEGAL.is_dir():
         raise SystemExit(f"The Android app is not at {ANDROID}; the site is built from its texts and images.")
+    if not IOS_LEGAL.is_dir():
+        raise SystemExit(f"The iOS app is not at {IOS_LEGAL.parent}; its legal texts are published here too.")
     clean()
     copy_assets()
     for lang in ("tr", "en"):
         write(PATHS["home"][lang], home(lang))
         write(PATHS["privacy"][lang], legal("privacy", lang))
         write(PATHS["terms"][lang], legal("terms", lang))
+        write(PATHS["ios_privacy"][lang], legal("ios_privacy", lang))
+        write(PATHS["ios_terms"][lang], legal("ios_terms", lang))
         write(PATHS["delete"][lang], delete_page(lang))
     write("404.html", not_found())
     (OUT / ".nojekyll").write_text("", encoding="utf-8")
