@@ -7,6 +7,7 @@ the apps never disagree. Store images, fonts and their licences are copied from 
     python kaynak/build.py
 """
 
+import hashlib
 import html
 import re
 import shutil
@@ -319,6 +320,12 @@ def icon(name, fill=False):
     return f'<svg viewBox="0 0 24 24" {style} aria-hidden="true">{ICONS[name]}</svg>'
 
 
+def version(name):
+    """A short fingerprint of a stylesheet or script, so a new build is never shown with an old copy
+    a browser kept (GitHub Pages lets browsers keep them for ten minutes)."""
+    return hashlib.sha1((HERE / "assets" / name).read_bytes()).hexdigest()[:8]
+
+
 def root_of(path):
     return "../" * path.count("/")
 
@@ -380,7 +387,7 @@ def page(key, lang, title, desc, body, og_image=None):
   <link rel="icon" type="image/png" href="{root}assets/icon-512.png">
   <link rel="apple-touch-icon" href="{root}assets/icon-512.png">
   <link rel="preload" href="{root}assets/fonts/bricolage_grotesque.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="{root}assets/site.css">
+  <link rel="stylesheet" href="{root}assets/site.css?v={version('site.css')}">
 </head>
 <body>
 <a class="skip" href="#main">{t['skip']}</a>
@@ -395,7 +402,7 @@ def page(key, lang, title, desc, body, og_image=None):
 {body}
 </main>
 {footer(lang, root)}
-<script src="{root}assets/site.js" defer></script>
+<script src="{root}assets/site.js?v={version('site.js')}" defer></script>
 </body>
 </html>
 """
@@ -812,7 +819,7 @@ def not_found():
   <title>Sayfa bulunamadı · Zinciri Kırma</title>
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/png" href="{base}assets/icon-512.png">
-  <link rel="stylesheet" href="{base}assets/site.css">
+  <link rel="stylesheet" href="{base}assets/site.css?v={version('site.css')}">
 </head>
 <body>
 <main class="wrap lost">

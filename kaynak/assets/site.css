@@ -200,6 +200,12 @@ h3 {
 .btn:active {
   transform: scale(0.98);
 }
+/* Every button's icon keeps its size, whatever the button. */
+.btn svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
 .btn-play {
   background: #ffffff;
   color: #12233d;
@@ -284,6 +290,7 @@ h3 {
 .cta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 12px;
 }
 .perks {
